@@ -1,4 +1,5 @@
 require 'byebug'
+require 'colorize'
 
 class Board
 
@@ -53,22 +54,24 @@ Winning_Combinations = [
    end
 
    def winner?
-
        Winning_Combinations.each do |array|
-        if stone_at(array[0].to_s) == "X" || stone_at(array[0].to_s) == "O"
-         if stone_at(array[0].to_s) ==  stone_at(array[1].to_s)  &&  stone_at(array[1].to_s) == stone_at(array[2].to_s)
-  #Check that one of them is x or 0 for it not to be
-           puts "Winner! The winner is #{stone_at(array[0].to_s)}"
-            true
+        if (valid_move?(array[0].to_s) == false) && stone_at(array[0].to_s) ==  stone_at(array[1].to_s)  &&  stone_at(array[1].to_s) == stone_at(array[2].to_s)
+             return true
           else
             false
-          end
-        else
-          false
-
        end
      end
   end
+
+  def tie?
+    @fields.each do |key, value|
+      if @fields.values.any? { |s| s == ' ' }
+        return false
+      else
+        return true
+      end
+    end
+end
 
 
 end
@@ -98,23 +101,41 @@ attr_accessor :position
 
   def next_stone
     if  @turn_count.even? == true
-    board.set_stone_at(position, "X")
+    board.set_stone_at(position, "X".colorize(:color => :yellow, :background => :black))
     else
-      board.set_stone_at(position, "O")
+      board.set_stone_at(position, "O".colorize(:color => :magenta, :background => :black))
+    end
+  end
+
+  def find_winner?
+    if board.winner? == true
+      puts "Winner!".colorize(:color => :green, :background => :black)
+      return true
+    else
+      false
+    end
+  end
+
+  def board_full?
+    if board.tie? == true
+      puts "We have a tie!".colorize(:color => :blue, :background => :black)
+      return true
+    else
+      return false
     end
   end
 
 
   def start_game
-    # system("clear")
+    system("clear")
     @turn_count = 0
-    while board.winner? != true
+    until find_winner? == true || board_full? == true
       ask_user_for_move
         if board.valid_position?(position) == true && board.valid_move?(position) == true
           next_stone
           @turn_count = @turn_count + 1
         else
-          puts "This is not a valid move. Please choose a position from 1 to 9 which is not taken!"
+          puts "This is not a valid move. Please choose a position from 1 to 9 which is not taken!".colorize(:color => :red, :background => :black)
         end
       print_board
     end
